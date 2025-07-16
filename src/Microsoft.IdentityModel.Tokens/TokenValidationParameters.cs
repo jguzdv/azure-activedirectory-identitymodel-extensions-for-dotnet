@@ -149,6 +149,11 @@ namespace Microsoft.IdentityModel.Tokens
         public AlgorithmValidator AlgorithmValidator { get; set; }
 
         /// <summary>
+        /// Gets or sets a boolean that indicates whether the AuthenticationContextClassRef needs to be an absolute URI.
+        /// </summary>
+        public bool AllowRelativeAuthenticationContextClassRefUri { get; set; }
+
+        /// <summary>
         /// Gets or sets a delegate that will be used to validate the audience.
         /// </summary>
         /// <remarks>

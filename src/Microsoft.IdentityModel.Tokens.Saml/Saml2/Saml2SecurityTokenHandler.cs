@@ -271,6 +271,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             ValidateSubject(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
 
+            ValidateAuthenticationStatement(samlToken, validationParameters);
+
             if (samlToken.Assertion.Conditions != null)
                 ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
 
@@ -314,6 +316,41 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     ValidateConfirmationData(samlToken, validationParameters, subjectConfirmation.SubjectConfirmationData);
             }
         }
+
+        /// <summary>
+        /// Validates the <see cref="Saml2AuthenticationStatement"/>
+        /// </summary>
+        /// <param name="samlToken">the Saml2 token that is being validated.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="samlToken"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="samlToken"/>.Assertion is null.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
+        protected virtual void ValidateAuthenticationStatement(Saml2SecurityToken samlToken, TokenValidationParameters validationParameters)
+        {
+            if (samlToken == null)
+                throw LogArgumentNullException(nameof(samlToken));
+
+            if (samlToken.Assertion == null)
+                throw LogArgumentNullException(nameof(samlToken.Assertion));
+
+            if (validationParameters == null)
+                throw LogArgumentNullException(nameof(validationParameters));
+
+            if (samlToken.Assertion.Statements == null || samlToken.Assertion.Statements.Count == 0)
+            {
+                return;
+            }
+
+            if (!validationParameters.AllowRelativeAuthenticationContextClassRefUri)
+            {
+                foreach (Saml2AuthenticationStatement statement in samlToken.Assertion.Statements.OfType<Saml2AuthenticationStatement>())
+                {
+                    if (statement.AuthenticationContext.ClassReference != null && !statement.AuthenticationContext.ClassReference.IsAbsoluteUri)
+                        throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(TokenLogMessages.IDX10279, MarkAsNonPII(statement.AuthenticationContext.ClassReference))));
+                }
+            }
+        }
+
 
         /// <summary>
         /// Validates the <see cref="Saml2SecurityToken.SigningKey"/> is an expected value.
