@@ -69,7 +69,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// [Saml2Core, 2.7.2.2]
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
-        /// <exception cref="ArgumentException">if 'value' is not an absolute Uri.</exception>
         public Uri ClassReference
         {
             get { return _classReference; }
@@ -77,9 +76,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 if (value == null)
                     throw LogArgumentNullException(nameof(value));
-
-                if (!value.IsAbsoluteUri)
-                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, MarkAsNonPII(nameof(ClassReference)), value)));
 
                 _classReference = value;
             }
